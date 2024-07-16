@@ -16,7 +16,7 @@ def reset_config(infile):
         config.write(configfile)
 
 
-def add2columns(infile):
+def create_column(infile):
     file = pd.read_csv(infile)
     file["can_dm"] = ""
     file["last_active"] = ""
@@ -26,12 +26,12 @@ def add2columns(infile):
 
 
 def get_column(column, col_name):
-    # i = 0
+    # index = 0
     try:
-        i = column.index(col_name)
+        index = column.index(col_name)
     except IndexError as e:
         raise e
-    return i
+    return index
 
 
 def fetch(infile):
@@ -42,17 +42,18 @@ def fetch(infile):
     file = config.get('FILE', 'name')
     auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
     api = tweepy.API(auth)
+    
     if not api:
         return "error"
 
     if file != infile:
         reset_config(infile)
-        add2columns(infile)
+        create_column(infile)
 
     today = datetime.today()
     d1 = today.date()
 
-    #example screen_name = 'ashiv28983908'
+    #example_screen_name = 'ashiv28983908'
     screen_name = 'screen_name'
 
     df = pd.read_csv(infile)
@@ -75,7 +76,7 @@ def fetch(infile):
 
     try:
         for user in users:
-            print(user)
+            #print(user)
             try:
                 data = api.show_friendship(source_screen_name=screen_name, target_screen_name=user)
                 data = jsonpickle.encode(data[0]._json, unpicklable=False)
@@ -105,7 +106,6 @@ def fetch(infile):
                 df.iloc[k, r] = '--'
                 df.iloc[k, s] = '--'
     except IndexError as e:
-        # print("Done!!")
         raise e
 
     finally:
